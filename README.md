@@ -1,320 +1,257 @@
-# 🛒 E-Commerce RESTful Backend API
+# 🛍️ Modern Full-Stack E-Commerce Platform
 
+[![Angular](https://img.shields.io/badge/Angular-17.3-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
+[![PrimeNG](https://img.shields.io/badge/PrimeNG-17.18-41B883?style=for-the-badge&logo=prime&logoColor=white)](https://primeng.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![JWT](https://img.shields.io/badge/Auth-JWT%20%26%20API%20Keys-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
-[![Stripe](https://img.shields.io/badge/Payments-Stripe%20API-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
-[![Apidog Ready](https://img.shields.io/badge/API%20Testing-Apidog%20%2F%20Postman%20Ready-F05032?style=for-the-badge&logo=postman&logoColor=white)](https://apidog.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-Checkout-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
 
-> **Notice:** This repository houses the **Backend RESTful Web API Engine** for a modern, scalable E-Commerce platform. It delivers full business logic, security layers, database modeling, payment gateways, and real-time messaging, serving web and mobile client applications.
+> An enterprise-grade, full-stack E-Commerce solution featuring a reactive, responsive **Angular 17** client interface and a high-performance **Node.js/Express & MongoDB** RESTful API engine.
 
 ---
 
 ## 📑 Table of Contents
-- [Project Overview](#-project-overview)
-- [Key Architectural Features](#-key-architectural-features)
-- [Tech Stack](#-tech-stack)
-- [API Modules & Endpoints](#-api-modules--endpoints)
-- [Apidog & Postman Integration](#-apidog--postman-integration)
-- [Project Structure](#-project-structure)
-- [Environment Configuration](#-environment-configuration)
-- [Getting Started](#-getting-started)
+- [Architecture Overview](#-architecture-overview)
+- [Frontend Deep-Dive (Angular 17)](#-frontend-deep-dive-angular-17)
+  - [Core Features & UI Modules](#-core-features--ui-modules)
+  - [UI/UX & Component System](#-uiux--component-system)
+  - [Directory Structure](#-frontend-directory-structure)
+  - [Guards, Interceptors & State Management](#-guards-interceptors--state-management)
+- [Backend REST API Overview](#-backend-rest-api-overview)
+- [Getting Started & Installation](#-getting-started--installation)
 - [Seeded Test Accounts](#-seeded-test-accounts)
+- [Scripts Reference](#-scripts-reference)
 - [License](#-license)
 
 ---
 
-## 🌟 Project Overview
+## 🏗️ Architecture Overview
 
-This project is an enterprise-ready, production-grade **RESTful Backend API** designed to power end-to-end e-commerce operations. Built on **Node.js**, **Express**, and **MongoDB (Mongoose)**, it follows strict **MVC architecture** principles, Clean Code standards, robust data validation, and multi-tier security.
+The system is architected as a decoupled client-server application:
+- **Frontend Client (`frontend/`)**: Built with **Angular 17**, **PrimeNG**, and **RxJS**. Handles reactive UI rendering, state management, client routing, token authentication, and interactive shopping experiences.
+- **Backend Service (`web api/`)**: Built with **Node.js**, **Express**, and **MongoDB**. Provides RESTful endpoints, dual JWT & API Key security layers, role-based authorization, rate limiting, and Stripe payments.
 
----
-
-## 🚀 Key Architectural Features
-
-- **Dual Authentication System**:
-  - **JWT (JSON Web Tokens)**: Secure token-based auth with access tokens, refresh tokens, and password reset workflows via email tokens.
-  - **Granular Scoped API Keys**: Custom API Key generator (`x-api-key`) with route-level and HTTP-method-level access control, active/revoked states, and expiration dates.
-- **Role-Based Access Control (RBAC)**: Hierarchical permission guards (`user`, `manager`, `admin`).
-- **Advanced Query Engine (API Features)**:
-  - Automatic pagination (`page`, `limit`).
-  - Rich comparison filtering (`[gte]`, `[gt]`, `[lte]`, `[lt]`, regex searching).
-  - Dynamic multi-field sorting (`sort=-price,sold`).
-  - Selective field projection (`fields=title,price,ratingsAverage`).
-- **Cart & Order Processing**:
-  - Dynamic cart calculation and multi-tier coupon redemption engine.
-  - Cash on delivery order creation.
-  - Card payments via **Stripe Checkout Sessions**.
-  - Order state tracking (`isPaid`, `isDelivered`, delivery timestamps).
-- **High-Performance Aggregations**:
-  - Real-time admin analytics dashboard pipeline calculating total revenue, active orders, and sales distribution.
-- **Real-Time Live Events**:
-  - **Server-Sent Events (SSE)** endpoint (`/api/v1/notifications/stream`) pushing live notifications to connected clients.
-- **Security & Reliability**:
-  - Brute-force & DDoS mitigation via `express-rate-limit`.
-  - Request body sanitation and Express Validator validation layers.
-  - Compression middleware for reduced bandwidth and rapid TTFB.
-  - Production-ready error handling (Operational vs. Programming errors).
-- **Media Processing Pipeline**:
-  - Multi-file image uploads via `Multer` with automated buffer resizing and WebP/JPEG formatting via `Sharp`.
-
----
-
-## 🛠 Tech Stack
-
-| Technology | Purpose |
-|---|---|
-| **Node.js** | Server runtime environment |
-| **Express.js** | Web framework and REST routing |
-| **MongoDB & Mongoose** | NoSQL database, ODM, schema indexing & aggregation |
-| **JSON Web Tokens (JWT)** | Stateless authentication |
-| **bcryptjs** | Salted hashing for credentials and API keys |
-| **Stripe SDK** | Online credit/debit card processing |
-| **Nodemailer** | Transactional emails and OTP reset verification |
-| **Sharp & Multer** | Media handling and image compression |
-| **Winston & Morgan** | Observability, structured logging, and HTTP profiling |
-
----
-
-## 🔌 API Modules & Endpoints
-
-Base URL: `http://localhost:8000/api/v1`
-
-### 1. Authentication (`/auth`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `POST` | `/auth/signup` | Register a new customer account | No |
-| `POST` | `/auth/login` | Sign in and receive JWT access token | No |
-| `POST` | `/auth/refreshToken` | Exchange refresh token for new access token | No |
-| `POST` | `/auth/forgotPassword` | Request password reset code via email | No |
-| `POST` | `/auth/verifyResetCode`| Verify 6-digit password reset code | No |
-| `PUT`  | `/auth/resetPassword`  | Set new password using verified email | No |
-
-### 2. Scoped API Keys (`/apikeys`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `POST`   | `/apikeys` | Generate a new granular API key | Bearer (User/Admin) |
-| `GET`    | `/apikeys` | View all active API keys for logged-in user | Bearer (User/Admin) |
-| `DELETE` | `/apikeys/:id` | Revoke/delete an API key | Bearer (User/Admin) |
-
-### 3. Products Catalog (`/products`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/products` | List all products (Pagination, Filters, Search) | Public |
-| `GET`    | `/products/:id` | Get product details by ID | Public |
-| `POST`   | `/products` | Create product (Multipart with images) | Admin |
-| `PUT`    | `/products/:id` | Update product details | Admin |
-| `DELETE` | `/products/:id` | Remove a product | Admin |
-| `POST`   | `/products/:id/apply-coupon` | Calculate discounted product price | User |
-| `GET`    | `/products/:productId/reviews` | Get reviews specifically for product | Public |
-
-### 4. Categories & Subcategories (`/categories`, `/subcategories`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/categories` | List all parent categories | Public |
-| `POST`   | `/categories` | Create category with image | Admin / Manager |
-| `GET`    | `/categories/:id` | Get category by ID | Public |
-| `PUT`    | `/categories/:id` | Update category | Admin / Manager |
-| `DELETE` | `/categories/:id` | Delete category | Admin |
-| `GET`    | `/categories/:categoryId/subcategories` | Get subcategories of category | Public |
-| `GET`    | `/subcategories` | List all subcategories | Public |
-| `POST`   | `/subcategories` | Create new subcategory | Admin / Manager |
-| `PUT`    | `/subcategories/:id` | Update subcategory | Admin / Manager |
-| `DELETE` | `/subcategories/:id` | Delete subcategory | Admin |
-
-### 5. Brands (`/brands`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/brands` | List all brands | Public |
-| `POST`   | `/brands` | Create new brand | Admin / Manager |
-| `GET`    | `/brands/:id` | Get brand by ID | Public |
-| `PUT`    | `/brands/:id` | Update brand details | Admin / Manager |
-| `DELETE` | `/brands/:id` | Delete brand | Admin |
-
-### 6. Shopping Cart (`/cart`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/cart` | Retrieve user cart & total price | Bearer / API Key (User) |
-| `POST`   | `/cart` | Add product item to cart | Bearer / API Key (User) |
-| `PUT`    | `/cart/:itemId` | Update quantity of cart item | Bearer / API Key (User) |
-| `PUT`    | `/cart/applyCoupon` | Apply discount coupon to cart | Bearer / API Key (User) |
-| `DELETE` | `/cart/:itemId` | Remove single item from cart | Bearer / API Key (User) |
-| `DELETE` | `/cart` | Clear entire shopping cart | Bearer / API Key (User) |
-
-### 7. Orders & Checkout (`/orders`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `POST`   | `/orders/:cartId` | Create Cash on Delivery order | Bearer / API Key (User) |
-| `POST`   | `/orders/checkout-session/:cartId` | Create Stripe card checkout session | Bearer / API Key (User) |
-| `GET`    | `/orders` | View orders (User: own orders, Admin: all) | Bearer / API Key |
-| `GET`    | `/orders/:id` | View specific order details | Bearer / API Key |
-| `PUT`    | `/orders/:id/pay` | Mark order as paid | Admin / Manager |
-| `PUT`    | `/orders/:id/deliver` | Mark order as delivered | Admin / Manager |
-
-### 8. Coupons (`/coupons`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/coupons` | Get all active coupons | Admin / Manager |
-| `POST`   | `/coupons` | Create a new discount coupon | Admin / Manager |
-| `GET`    | `/coupons/:id` | Get specific coupon | Admin / Manager |
-| `PUT`    | `/coupons/:id` | Update coupon expiration/discount | Admin / Manager |
-| `DELETE` | `/coupons/:id` | Delete coupon | Admin / Manager |
-
-### 9. Reviews & Ratings (`/reviews`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/reviews` | List all product reviews | Public |
-| `POST`   | `/reviews` | Submit a review & rating (1-5) | Bearer / API Key (User) |
-| `GET`    | `/reviews/:id` | Get single review | Public |
-| `PUT`    | `/reviews/:id` | Update own review | Bearer / API Key (User) |
-| `DELETE` | `/reviews/:id` | Delete review | User / Admin / Manager |
-
-### 10. Wishlist (`/wishlist`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/wishlist` | Get logged user's favorite products | Bearer / API Key (User) |
-| `POST`   | `/wishlist` | Add product to wishlist | Bearer / API Key (User) |
-| `DELETE` | `/wishlist/:productId` | Remove product from wishlist | Bearer / API Key (User) |
-
-### 11. User Addresses (`/addresses`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/addresses` | List saved delivery addresses | Bearer / API Key (User) |
-| `POST`   | `/addresses` | Add a new address (alias, city, phone) | Bearer / API Key (User) |
-| `PUT`    | `/addresses/:addressId` | Edit existing address | Bearer / API Key (User) |
-| `DELETE` | `/addresses/:addressId` | Remove address | Bearer / API Key (User) |
-
-### 12. User Profile & Admin Management (`/users`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/users/getMe` | View current logged-in user profile | Bearer / API Key |
-| `PUT`    | `/users/updateMe` | Update profile info (name, email, phone) | Bearer / API Key |
-| `PUT`    | `/users/changeMyPassword` | Change own password | Bearer / API Key |
-| `DELETE` | `/users/deleteMe` | Deactivate own account | Bearer / API Key |
-| `GET`    | `/users` | List all platform users | Admin / Manager |
-| `POST`   | `/users` | Create user with explicit role | Admin |
-| `GET`    | `/users/:id` | Get user by ID | Admin / Manager |
-| `PUT`    | `/users/:id` | Update user data/role | Admin / Manager |
-| `DELETE` | `/users/:id` | Delete user | Admin |
-| `PUT`    | `/users/changePassword/:id` | Admin change user password | Admin |
-
-### 13. Dashboard & Analytics (`/dashboard`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/dashboard/stats` | Aggregated counts, total revenue, recent orders | Admin / Manager |
-
-### 14. Real-time Live Notifications (`/notifications`)
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET`    | `/notifications/stream` | Server-Sent Events (SSE) live notifications stream | Bearer (User/Admin) |
-
----
-
-## 🐶 Apidog & Postman Integration
-
-The repository includes pre-built API specifications ready for **instant 1-click import into [Apidog](https://apidog.com/) or Postman**:
-
-- **Apidog / Postman Collection**: [`apidog_collection.json`](./apidog_collection.json) *(Postman v2.1 standard format with folders, environment variables, preconfigured bearer tokens, and JSON schemas)*.
-- **OpenAPI 3.0 Specification**: [`openapi_spec.json`](./openapi_spec.json) *(Standard OAS 3.0.3 definition)*.
-
-### How to Import into Apidog:
-1. Open **Apidog** and select or create a project.
-2. Click **Import** (Settings ➔ Import Data or click the `+` icon).
-3. Select **Postman** (or **OpenAPI/Swagger**).
-4. Drag and drop `apidog_collection.json` (or `openapi_spec.json`).
-5. All 15 modules and 50+ endpoints will automatically load with headers, query parameters, request bodies, and authentication setups.
-
-### Preconfigured Environment Variables:
-| Variable | Description | Default Value |
-|---|---|---|
-| `BASE_URL` | Base API route | `http://localhost:8000/api/v1` |
-| `JWT_TOKEN` | Bearer JWT access token | *(Obtained from `/auth/login`)* |
-| `API_KEY` | Machine-to-machine key | *(Obtained from `/apikeys`)* |
-
----
-
-## 📁 Project Structure
-
-```text
-├── web api/
-│   ├── config/              # MongoDB connection & configurations
-│   ├── middlewares/         # Global error handler, upload & auth middlewares
-│   ├── models/              # Mongoose schemas (User, Product, Order, Cart, etc.)
-│   ├── routes/              # Express route declarations (15 modular routes)
-│   ├── services/            # Controller & business logic layer
-│   ├── utils/               # ApiFeatures, validators, tokens, logger, seeders
-│   ├── uploads/             # Image storage (products, categories, users)
-│   ├── config.env           # Environment variables
-│   ├── server.js            # Main Express app initialization
-│   ├── apidog_collection.json # Apidog / Postman Collection
-│   └── openapi_spec.json    # OpenAPI 3.0 specification
-├── apidog_collection.json   # Root-level Apidog Collection copy
-├── openapi_spec.json        # Root-level OpenAPI specification copy
-└── README.md                # Documentation
+```
+┌────────────────────────────────────────────────────────┐
+│               Angular 17 Frontend App                  │
+│  (PrimeNG 17, PrimeFlex, RxJS Observables, Interceptors)│
+└───────────────────────────┬────────────────────────────┘
+                            │ HTTP Requests (Bearer / API Key)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│             Node.js / Express REST API                 │
+│ (Dual Auth, RBAC Guards, Rate Limiter, Stripe, Sharp)  │
+└───────────────────────────┬────────────────────────────┘
+                            │ Mongoose ODM
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│                   MongoDB Database                     │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚙️ Environment Configuration
+## 🎨 Frontend Deep-Dive (Angular 17)
 
-Create or update `web api/config.env`:
+The frontend delivers an ultra-smooth, responsive user experience optimized for desktop, tablet, and mobile devices.
 
+### ✨ Core Features & UI Modules
+
+#### 1. 🏠 Storefront & Home Page
+- **Hero Banners & Carousels**: Dynamic promotional sliders for seasonal offers and new arrivals.
+- **Category Explorer**: Visual grid and horizontal carousel to browse catalog departments.
+- **Popular Brands**: Brand logos showcase with direct navigation to brand-specific catalogs.
+- **Featured & Top Deals**: Live grid of trending products with sale badges and discount tags.
+
+#### 2. 🔍 Product Catalog & Discovery
+- **Real-Time Live Search**: Debounced search input that queries products instantly without page reloads.
+- **Multi-Faceted Filtering**: Filter catalog by Category, Subcategory, Brand, and Price range sliders.
+- **Dynamic Sorting**: Sort items by:
+  - Highest Rated
+  - Price: Low to High / High to Low
+  - Top Selling
+  - Newest Arrivals
+- **Pagination & Loading**: Smooth pagination controls paired with PrimeNG skeleton loaders.
+
+#### 3. 📦 Interactive Product Details
+- **High-Resolution Gallery**: Image zoom and multi-thumbnail gallery.
+- **Product Options**: Color variants, real-time stock availability, and quantity stepper.
+- **Instant Coupon Calculator**: Users can test promo codes directly on the product card.
+- **Reviews & Rating Engine**:
+  - Interactive 5-star rating submission.
+  - Customer review comments with user avatars and submission timestamps.
+
+#### 4. 🛒 Dynamic Shopping Cart
+- **Live Quantity Controls**: Increment, decrement, or remove items with automatic recalculation.
+- **Discount Voucher Engine**: Promo code application with immediate cart balance adjustment.
+- **Order Summary**: Clear breakdown of subtotal, shipping estimates, discount savings, and total payable amount.
+- **One-Click Clear**: Option to empty the cart or proceed to checkout.
+
+#### 5. 💳 Multi-Step Checkout Flow
+- **Delivery Address Manager**: Select from saved addresses or add a new shipping destination on the fly.
+- **Dual Payment Methods**:
+  - **Cash on Delivery (COD)**: Instant order confirmation.
+  - **Online Card Payment**: Redirects to **Stripe Checkout** for card payments.
+
+#### 6. 📦 Orders History & Tracking
+- **Order Timeline**: Visual status badges (`Pending`, `Paid`, `Delivered`).
+- **Detailed Invoices**: View all purchased line items, quantities, shipping details, and payment statuses.
+
+#### 7. ❤️ Wishlist & Favorites
+- **One-Tap Heart Toggle**: Add or remove favorite products with instant heart animation.
+- **Quick Move-to-Cart**: Transfer items from the wishlist directly into the shopping cart.
+
+#### 8. 👤 User Account Hub
+- **Profile Management**: Update personal info (Name, Email, Phone).
+- **Password Security**: Change password with validation guards.
+- **Address Book**: Manage multiple delivery addresses (Home, Work, etc.).
+
+#### 9. 🔑 Developer API Keys Portal
+- **API Key Management Dashboard**: Create scoped API keys for 3rd-party software or mobile apps.
+- **Granular Route Permissions**: Restrict keys to specific routes (e.g., `/products`, `/categories`) and HTTP methods (`GET`, `POST`).
+- **Key Expiration & Revocation**: Set custom expiration dates and revoke compromised keys immediately.
+
+#### 10. 📊 Admin Analytics Dashboard & User Management
+- **Analytics Metrics**: Real-time cards showing Total Sales, Net Revenue, Orders, Products, and User counts.
+- **Recent Orders Stream**: Live feed of incoming customer orders.
+- **User Management**: Search, promote to Manager/Admin, or deactivate platform accounts.
+
+#### 11. 🔐 Authentication & Onboarding
+- **User Registration**: Form validation (password confirmation, email regex).
+- **Sign In**: JWT token issuance and persistent auth state.
+- **Password Recovery Workflow**: Forgot password email trigger, 6-digit OTP verification screen, and new password setup.
+
+---
+
+### 🧩 UI/UX & Component System
+
+- **PrimeNG 17**: Pre-styled enterprise UI components including Buttons, Dropdowns, Dialogs, Cards, Tables, Paginators, Rating widgets, and Toasts.
+- **PrimeFlex**: Responsive utility CSS system providing flexbox layouts and responsive spacing across all screen sizes.
+- **NgxSpinner**: Global animated spinner for seamless route transitions and asynchronous data loading.
+- **Skeleton Loaders**: Content placeholders to eliminate layout shifts while data is loading.
+- **Toast Notifications**: Non-intrusive feedback for cart additions, successful updates, and error alerts.
+
+---
+
+### 📂 Frontend Directory Structure
+
+```text
+frontend/src/app/
+├── core/
+│   ├── apiRoot/             # Base API URLs and environment configurations
+│   ├── guards/              # Route protection (auth.guard, admin.guard)
+│   ├── interceptors/        # HTTP interceptors (Token injection, Error handling)
+│   ├── models/              # TypeScript interfaces (Product, User, Cart, Order)
+│   ├── pipes/               # Custom data transform pipes
+│   └── service/             # Injectable services (Auth, Cart, Product, Order, etc.)
+├── layouts/                 # Master application layouts (Navbar, Footer, Auth Layout)
+├── pages/                   # Application route views:
+│   ├── home/                # Landing page & carousels
+│   ├── products/            # Catalog, search, filters & sort
+│   ├── details/             # Product details & reviews
+│   ├── cart/                # Shopping cart & coupon
+│   ├── checkout/            # Multi-address & payment gateway
+│   ├── all-orders/          # Customer orders history
+│   ├── orders-details/      # Detailed order breakdown
+│   ├── favorite/            # User wishlist
+│   ├── profile/             # Account management
+│   ├── create-api-key/      # Developer API key generator
+│   ├── dashboard/           # Admin metrics & statistics
+│   ├── users-management/    # Admin user controls
+│   ├── login/               # Sign in page
+│   ├── register/            # Sign up page
+│   ├── forgot-password/     # Password recovery email
+│   ├── verify-code/         # OTP verification
+│   └── reset-password/      # New password setup
+└── shared/                  # Reusable components:
+    ├── card/                # Product card with hover effects
+    ├── search-bar/          # Live debounced search input
+    ├── sort-dropdown/       # Catalog sort menu
+    ├── skeleton-loader/     # Loading placeholders
+    ├── checkout-form/       # Shipping address modal/form
+    └── empty/               # Empty state graphics
+```
+
+---
+
+### 🛡️ Guards, Interceptors & State Management
+
+- **HTTP Auth Interceptor**: Automatically attaches `Authorization: Bearer <token>` to all protected API requests.
+- **HTTP Error Interceptor**: Intercepts `401 Unauthorized`, `403 Forbidden`, and `500 Server Errors`, displaying PrimeNG Toast error messages.
+- **Route Guards**:
+  - `authGuard`: Protects profile, orders, checkout, and wishlist routes from unauthenticated access.
+  - `adminGuard`: Restricts analytics dashboard and user management pages to users with `admin` or `manager` roles.
+- **Reactive State (RxJS)**: BehaviorSubjects for live cart badge counts, wishlist indicators, and user authentication state.
+
+---
+
+## ⚙️ Backend REST API Overview
+
+The backend is built with **Node.js**, **Express**, and **MongoDB**:
+- **Authentication**: Stateless JWT + Granular route-restricted API Keys (`x-api-key`).
+- **Role-Based Access Control**: `user`, `manager`, `admin`.
+- **Payment Processing**: Stripe Checkout integration & Webhooks.
+- **Security**: `express-rate-limit`, input sanitization, and CORS configuration.
+- **Media Pipeline**: `Multer` + `Sharp` image compression and resizing.
+- **Live Updates**: Server-Sent Events (SSE) notification stream.
+
+---
+
+## 🚀 Getting Started & Installation
+
+### 1. Prerequisites
+- **Node.js**: v18.x or higher
+- **npm**: v9.x or higher
+- **MongoDB**: Local MongoDB instance or Atlas connection string
+
+### 2. Clone & Install Dependencies
+```bash
+# Clone the repository
+git clone https://github.com/ahmed-Basal/E-comerce-NodeJs.git
+cd E-comerce-NodeJs/full-stack-master
+
+# Install all dependencies (Frontend + Backend) in one step
+npm run install:all
+```
+
+### 3. Setup Environment Variables
+Create a `config.env` file in `web api/config.env`:
 ```env
 PORT=8000
 NODE_ENV=development
 BASE_URL=http://localhost:8000
-
-# Database
-DB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ecommerce?retryWrites=true&w=majority
-
-# JWT Authentication
-JWT_SECRET_KEY=your_super_secret_jwt_key_here
+DB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce
+JWT_SECRET_KEY=your_jwt_secret_key
 JWT_EXPIRE_TIME=90d
-REFRESH_TOKEN_SECRET_KEY=your_refresh_secret_key
-REFRESH_TOKEN_EXPIRE_TIME=30d
-
-# Stripe Payment
 STRIPE_SECRET_KEY=sk_test_...
-
-# Email Service (Nodemailer for password recovery)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
 ```
 
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-- **Node.js**: v18 or higher
-- **npm**: v9 or higher
-- **MongoDB**: Local MongoDB instance or MongoDB Atlas URI
-
-### 2. Install Dependencies
+### 4. Run Development Servers
+You can launch both the frontend and backend concurrently with a single command:
 ```bash
-cd "web api"
-npm install
+# Start both Backend (Port 8000) and Frontend (Port 4200) concurrently
+npm start
 ```
 
-### 3. Run Development Server
+Or run them individually:
 ```bash
-npm run start:dev
+# Run Backend API
+npm run start:backend
+
+# Run Frontend Angular App
+npm run start:frontend
 ```
 
-Server will start on:
-```text
-App running on port 8000
-Database Connected: cluster0.mongodb.net
-```
+Open your browser at:
+👉 **`http://localhost:4200`**
 
 ---
 
 ## 👥 Seeded Test Accounts
 
-Upon server startup, the system automatically checks and seeds default accounts if they do not already exist:
+The backend automatically creates default test users upon first startup:
 
 | Role | Email | Password |
 |---|---|---|
@@ -322,9 +259,22 @@ Upon server startup, the system automatically checks and seeds default accounts 
 | **Manager** | `manager@gmail.com` | `password123` |
 | **User** | `user@gmail.com` | `password123` |
 
-You can immediately test any endpoint by logging in with these credentials!
+Log in with `admin@gmail.com` to access the **Admin Analytics Dashboard** and **User Management** tools.
+
+---
+
+## 📜 Scripts Reference
+
+In the `full-stack-master` directory:
+
+| Script | Command | Description |
+|---|---|---|
+| `npm run install:all` | Installs dependencies for both `frontend` and `web api` |
+| `npm start` | Concurrently runs backend on `:8000` and frontend on `:4200` |
+| `npm run start:frontend` | Starts Angular development server with hot-reload |
+| `npm run start:backend` | Starts Express server with Nodemon auto-restart |
 
 ---
 
 ## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
+This project is open-source and distributed under the [MIT License](LICENSE).
