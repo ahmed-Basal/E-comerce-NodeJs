@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
   // Authentication & Password Reset Endpoints
   LOGIN: `${baseUrl}/api/v1/auth/login`,
   SIGNUP: `${baseUrl}/api/v1/auth/signup`,
+  REFRESH_TOKEN: `${baseUrl}/api/v1/auth/refreshToken`,
   FORGOT_PASSWORD: `${baseUrl}/api/v1/auth/forgotPassword`,
   VERIFY_RESET_CODE: `${baseUrl}/api/v1/auth/verifyResetCode`,
   RESET_PASSWORD: `${baseUrl}/api/v1/auth/resetPassword`,

@@ -20,6 +20,7 @@
   - [Directory Structure](#-frontend-directory-structure)
   - [Guards, Interceptors & State Management](#-guards-interceptors--state-management)
 - [Backend REST API Overview](#-backend-rest-api-overview)
+- [Security Deep-Dive: Refresh Token & Rate Limiting](#-security-deep-dive-refresh-token--rate-limiting)
 - [Getting Started & Installation](#-getting-started--installation)
 - [Seeded Test Accounts](#-seeded-test-accounts)
 - [Scripts Reference](#-scripts-reference)
@@ -193,9 +194,65 @@ The backend is built with **Node.js**, **Express**, and **MongoDB**:
 - **Authentication**: Stateless JWT + Granular route-restricted API Keys (`x-api-key`).
 - **Role-Based Access Control**: `user`, `manager`, `admin`.
 - **Payment Processing**: Stripe Checkout integration & Webhooks.
-- **Security**: `express-rate-limit`, input sanitization, and CORS configuration.
+- **Security**: Multi-tier `express-rate-limit`, input sanitization, and CORS configuration.
 - **Media Pipeline**: `Multer` + `Sharp` image compression and resizing.
 - **Live Updates**: Server-Sent Events (SSE) notification stream.
+
+---
+
+## 🛡️ Security Deep-Dive: Refresh Token & Rate Limiting
+
+### 🔄 1. Refresh Token & Silent Token Rotation
+To provide high security without degrading user experience, the system utilizes a **dual-token authentication lifecycle**:
+- **Access Token (Short-lived)**: Carried in the `Authorization: Bearer <token>` header for all authenticated requests.
+- **Refresh Token (Long-lived)**: Stored securely and transmitted to `/api/v1/auth/refreshToken` to generate a brand-new access token without forcing the user to re-enter their credentials.
+
+#### 🔄 Token Lifecycle Flow:
+```
+Client (Angular App)                            Server (Node.js/Express)
+   │                                                        │
+   ├────── POST /api/v1/auth/login ────────────────────────►│
+   │◄───── Returns Access Token + Refresh Token ────────────┤
+   │                                                        │
+   │ (Time passes... Access Token expires)                  │
+   │                                                        │
+   ├────── GET /api/v1/orders (Expired Access Token) ──────►│
+   │◄───── 401 Unauthorized ────────────────────────────────┤
+   │                                                        │
+   ├─ [Angular authInterceptor catches 401 silently]        │
+   ├────── POST /api/v1/auth/refreshToken ─────────────────►│
+   │◄───── Returns Brand New Access Token ──────────────────┤
+   │                                                        │
+   ├────── Re-sends GET /api/v1/orders (New Token) ─────────►│
+   │◄───── 200 OK (User experience uninterrupted) ──────────┤
+   ▼                                                        ▼
+```
+
+- **Frontend Interceptor Automation**: `authInterceptor` transparently intercepts `401 Unauthorized` responses, calls `/api/v1/auth/refreshToken` using the stored refresh token, updates storage, and replays the failed request with zero interruption.
+- **Password Reset Safeguard**: If a user changes their password, all previously generated refresh tokens are immediately revoked by comparing token issuance time against `passwordChangedAt`.
+
+---
+
+### 🛑 2. Multi-Tier Rate Limiting (DDoS & Brute-Force Defense)
+The API protects server resources and user accounts using tiered rate limiting via `express-rate-limit`:
+
+| Limiter Layer | Applied Route | Threshold | Purpose |
+|---|---|---|---|
+| **Global API Limiter** | `/api/*` | **100 requests / 15 mins** | Mitigates DoS attacks, aggressive scraping bots, and server overload. |
+| **Auth Strict Limiter** | `/api/v1/auth/*` | **20 requests / 15 mins** | Blocks brute-force dictionary attacks on Login, Signup, and OTP verification. |
+
+#### Standard Response Headers & HTTP 429:
+When requests exceed the limit, the server responds with **`429 Too Many Requests`**:
+```json
+{
+  "status": "fail",
+  "message": "Too many authentication requests from this IP, please try again after 15 minutes"
+}
+```
+Client applications receive rate limit status via standard RFC headers:
+- `RateLimit-Limit`: Maximum requests allowed in the 15-minute window.
+- `RateLimit-Remaining`: Number of requests remaining.
+- `RateLimit-Reset`: Time remaining until the rate limit window resets.
 
 ---
 

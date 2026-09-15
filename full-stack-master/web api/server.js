@@ -51,6 +51,19 @@ app.use("/users", express.static(path.join(__dirname, "uploads", "users")));
 // Apply rate limiting to all /api routes
 app.use("/api", limiter);
 
+// Stricter rate limiting for authentication endpoints to prevent brute-force attacks
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: {
+    status: "fail",
+    message: "Too many authentication requests from this IP, please try again after 15 minutes",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/v1/auth", authLimiter);
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`mode: ${process.env.NODE_ENV}`);

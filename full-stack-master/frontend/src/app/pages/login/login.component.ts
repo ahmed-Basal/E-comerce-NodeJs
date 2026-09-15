@@ -67,7 +67,12 @@ export class LoginComponent {
           this._notifecationsService.showSuccess('success', 'success login');
           const userName = response.data?.name || '';
           const userRole = response.data?.role || 'user';
-          this.authService_.saveSession(response.token, userName, userRole);
+          this.authService_.saveSession(
+            response.token,
+            userName,
+            userRole,
+            response.refreshToken
+          );
 
           if (userRole === 'admin' || userRole === 'manager') {
             this.router.navigate(['dashboard']);

@@ -28,15 +28,33 @@ export class AuthService {
     private _cart: CartService
   ) {}
 
-  saveSession(token: string, username: string, role: string): void {
+  saveSession(token: string, username: string, role: string, refreshToken?: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', token);
       localStorage.setItem('username', username);
       localStorage.setItem('userRole', role);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
     }
     this._userData.userName.next(username);
     this.isLoggedIn$.next(true);
     this._cart.syncCartCount();
+  }
+
+  refreshToken(): Observable<{ token?: string; accessToken?: string; refreshToken?: string }> {
+    const refreshToken = this.getRefreshToken();
+    return this._httpClient.post<{ token?: string; accessToken?: string; refreshToken?: string }>(
+      API_ENDPOINTS.REFRESH_TOKEN,
+      { refreshToken }
+    );
+  }
+
+  getRefreshToken(): string | null {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('refreshToken');
+    }
+    return null;
   }
 
   register(registerData: RegisterRequestModel): Observable<RegisterResponseModel> {
